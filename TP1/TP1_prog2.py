@@ -46,7 +46,7 @@ for k in range(2,16):
     mean_k = score_sum/nb_splits
     mean_scores.append(mean_k)
     print("k = ", k, "score moyen = ", mean_k)
-    
+
 #on fixe k avec l'optimal trouvé (peut faire automatiquement)
 #k = mean_scores.index(max(mean_scores)) + 2
 k = 3
@@ -59,10 +59,11 @@ for pourc in np.arange(0.7,0.9,0.05):
     score = clf.score(xtest,ytest)
     scores.append(score)
     print("pourcentage = ", pourc * 100, "% score = ", score)
-        
+
 # on fixe le pourcentage à 90%
 # pourcentage = scores.index(max(scores)) * 0.05 + 0.7
 pourcentage = 0.9
+scores_pourc = []
 #variation de la taille de l'échantillon
 for s in range(2000,62001,5000):
     index = np.random.randint(70000, size=s)
@@ -71,5 +72,22 @@ for s in range(2000,62001,5000):
     xtrain, xtest, ytrain, ytest = train_test_split(data, target,train_size=pourcentage)
     clf.fit(xtrain,ytrain)
     score = clf.score(xtest,ytest)
+    scores_pourc.append(score)
     print("taille = ", s, "score = ", score)
 
+# on fixe la taille de l'échantillon
+taille_echant = 20000
+index = np.random.randint(70000, size=s)
+data = mnist.data[index]
+target = mnist.target[index]
+xtrain, xtest, ytrain, ytest = train_test_split(data, target,train_size=pourcentage)
+scores_dist = []
+#variation des distances
+for dist in range(0,5):
+    clf = neighbors.KNeighborsClassifier(k,p=dist)
+    clf.fit(xtrain,ytrain)
+    score = clf.score(xtest,ytest)
+    scores_dist.append(score)
+    print("distance = ", p, "score = ", score)
+
+#
