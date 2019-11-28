@@ -19,27 +19,31 @@ import time
 mnist = fetch_openml('mnist_784')
 
 
-# In[28]:
+# In[9]:
 
 
-data = mnist.data
-target = mnist.target
-#division de la base en données d'apprentissage (70%) et de test
+#tableau de 7000 valeurs aléatoires entre à et 70000
+index = np.random.randint(70000, size=20000)
+#échantillon de 7000 données de Mnist
+data = mnist.data[index]
+#étiquettes correspondant aux 7000 données échantillons
+target = mnist.target[index]
+#division de la base en données d'apprentissage (70%) et de test (30%)
 datatrain, datatest, targettrain, targettest = train_test_split(data, target,train_size=0.70)
 print(datatrain.shape)
 print(targettrain.shape)
 
 
-# In[4]:
+# In[10]:
 
 
 # SVM avec noyau linéaire
-clsvm = SVC(kernel='linear')
+clsvm = SVC(kernel='poly')
 clsvm.fit(datatrain,targettrain)
-clsvm.score(datatest,targettest)
+print(clsvm.score(datatest,targettest))
 
 
-# In[ ]:
+# In[11]:
 
 
 precisions_kernel = []
@@ -71,7 +75,7 @@ for n in ["linear", "poly", "rbf", "sigmoid"]:
     print(cm)
 
 
-# In[9]:
+# In[12]:
 
 
 fig, ax1 = plt.subplots()
@@ -93,7 +97,7 @@ fig.tight_layout()
 plt.show()
 
 
-# In[10]:
+# In[13]:
 
 
 fig, ax1 = plt.subplots()
@@ -115,7 +119,7 @@ fig.tight_layout()
 plt.show()
 
 
-# In[11]:
+# In[14]:
 
 
 plt.plot(["linear", "poly", "rbf", "sigmoid"],temps_kernel,'+-')
@@ -124,7 +128,7 @@ plt.xlabel('kernel')
 plt.show()
 
 
-# In[12]:
+# In[15]:
 
 
 plt.plot(["linear", "poly", "rbf", "sigmoid"],tt_kernel,'+-')
@@ -133,7 +137,7 @@ plt.xlabel('kernel')
 plt.show()
 
 
-# In[13]:
+# In[16]:
 
 
 plt.plot(["linear", "poly", "rbf", "sigmoid"],erreur_kernel,'+-')
@@ -142,7 +146,7 @@ plt.xlabel('kernel')
 plt.show()
 
 
-# In[16]:
+# In[17]:
 
 
 fig, ax1 = plt.subplots()
@@ -175,7 +179,7 @@ erreur_c = []
 train_precisions_c = []
 train_erreur_c = []
 for tol in [0.1, 0.3, 0.5, 0.7, 1]:
-    clsvm = SVC(C=tol)
+    clsvm = SVC(C=tol,kernel='poly')
     st = time.time()
     start_time = time.process_time()
     clsvm.fit(datatrain,targettrain)
@@ -335,4 +339,46 @@ plt.plot([0.1, 0.3, 0.5, 0.7, 1],erreur_c,'+-')
 plt.ylabel('erreur')
 plt.xlabel('tolerance')
 plt.show()
+
+
+# In[28]:
+
+
+precisions_c = []
+rappel_c = []
+temps_c = []
+tt_c = []
+erreur_c = []
+train_precisions_c = []
+train_erreur_c = []
+for tol in [0.1, 0.3, 0.5, 0.7, 1]:
+    clsvm = SVC(C=tol,kernel='linear')
+    st = time.time()
+    start_time = time.process_time()
+    clsvm.fit(datatrain,targettrain)
+    elapsed = time.process_time()-start_time
+    duration = time.time()-st
+    testpred = clsvm.predict(datatest)
+    trainpred = clsvm.predict(datatrain)
+    prec = clsvm.score(datatest,targettest)
+    train_prec = clsvm.score(datatrain,targettrain)
+    rap = recall_score(targettest,testpred,average='micro')
+    err = zero_one_loss(targettest,testpred)
+    train_err = zero_one_loss(targettrain,trainpred)
+    precisions_c.append(prec)
+    train_precisions_c.append(train_prec)
+    rappel_c.append(rap)
+    temps_c.append(elapsed)
+    tt_c.append(duration)
+    erreur_c.append(err)
+    train_erreur_c.append(train_err)
+    print("precision =",prec,"precision apprentissage =",train_prec,"rappel =",rap,"erreur =",err,"temps =",elapsed,"time =",duration,"tolérance aux erreurs =",tol)
+    cm = confusion_matrix(targettest,testpred)
+    print(cm)
+
+
+# In[ ]:
+
+
+
 
